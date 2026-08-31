@@ -33,7 +33,7 @@ export default async function ProjectsPage({
 
   let query = supabase
     .from("projects")
-    .select("id, name, status, priority, target_date, area_id, areas!inner(id, name, workspace_id)")
+    .select("id, name, status, priority, target_date, area_id, deal_value, pipeline_stage, areas!inner(id, name, workspace_id)")
     .eq("areas.workspace_id", workspaceId)
     .order("created_at", { ascending: false });
 
@@ -87,6 +87,10 @@ export default async function ProjectsPage({
             <div className="muted" style={{ fontSize: 12 }}>{p.areas?.name}</div>
           </div>
           <div className="row" style={{ gap: 8 }}>
+            {p.deal_value && (
+              <span className="pill">${Number(p.deal_value).toLocaleString()}</span>
+            )}
+            {p.pipeline_stage && <span className="pill">{p.pipeline_stage}</span>}
             <span className={`pill ${p.priority}`}>{p.priority}</span>
             <span className="pill">{p.status}</span>
           </div>
