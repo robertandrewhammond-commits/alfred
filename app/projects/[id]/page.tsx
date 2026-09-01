@@ -61,7 +61,7 @@ export default async function ProjectDetailPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, description, status, priority, target_date, areas(name)")
+    .select("id, name, description, status, priority, target_date, deal_value, estimated_cost, win_probability, pipeline_stage, notion_notes, areas(name)")
     .eq("id", params.id)
     .single();
 
@@ -91,6 +91,28 @@ export default async function ProjectDetailPage({
       <p className="muted">
         {(project.areas as any)?.name} · {project.status} · {project.priority} priority
       </p>
+
+      {(project.deal_value || project.pipeline_stage) && (
+        <div className="row" style={{ gap: 8, marginTop: 10 }}>
+          {project.deal_value && (
+            <span className="pill">${Number(project.deal_value).toLocaleString()}</span>
+          )}
+          {project.estimated_cost && (
+            <span className="pill">Cost: ${Number(project.estimated_cost).toLocaleString()}</span>
+          )}
+          {project.win_probability != null && (
+            <span className="pill">{Math.round(Number(project.win_probability) * 100)}% win</span>
+          )}
+          {project.pipeline_stage && <span className="pill">{project.pipeline_stage}</span>}
+        </div>
+      )}
+
+      {project.notion_notes && (
+        <>
+          <h2>Intelligence</h2>
+          <div className="card" style={{ whiteSpace: "pre-wrap" }}>{project.notion_notes}</div>
+        </>
+      )}
 
       <h2>Tasks</h2>
       <form action={createTask} className="card">
