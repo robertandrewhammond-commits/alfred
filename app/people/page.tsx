@@ -38,7 +38,7 @@ export default async function PeoplePage({
       <h2>{people?.length ?? 0} contacts</h2>
       {(!people || people.length === 0) && <p className="empty">No contacts found.</p>}
       {people?.map((p: any) => (
-        <div key={p.id} className="card">
+        <a key={p.id} href={`/people/${p.id}`} className="card" style={{ display: "block" }}>
           <div className="row">
             <div>
               <div style={{ fontWeight: 600 }}>{p.full_name}</div>
@@ -59,7 +59,7 @@ export default async function PeoplePage({
           <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
             {p.email ? p.email : ""}{p.email && p.phone ? " · " : ""}{p.phone ? p.phone : ""}
           </div>
-        </div>
+        </a>
       ))}
     </Shell>
   );
