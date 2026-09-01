@@ -43,7 +43,7 @@ export default async function AreaDashboardPage({
 
   if (!area) {
     return (
-      <Shell active="/areas">
+      <Shell active="/home">
         <p className="empty">Area not found.</p>
       </Shell>
     );
@@ -69,7 +69,7 @@ export default async function AreaDashboardPage({
   );
 
   return (
-    <Shell active="/areas">
+    <Shell active="/home">
       <h1>{area.name}</h1>
       <p className="muted">
         {isPipeline ? "Pipeline space" : "Freeform space"}
