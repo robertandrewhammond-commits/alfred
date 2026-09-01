@@ -2,6 +2,7 @@ import Shell from "@/components/Shell";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateWorkspaceId } from "@/lib/alfred/workspace";
 import { revalidatePath } from "next/cache";
+import { areaInitials, areaColor } from "@/lib/alfred/avatar";
 
 async function createArea(formData: FormData) {
   "use server";
@@ -30,6 +31,24 @@ export default async function AreasPage() {
       <h1>Areas</h1>
       <p className="muted">High-level categories of responsibility.</p>
 
+      <h2>All areas</h2>
+      {(!areas || areas.length === 0) && (
+        <p className="empty">No areas yet — add one below.</p>
+      )}
+      <div className="area-grid">
+        {areas?.map((a: any) => (
+          <a key={a.id} href={`/areas/${a.id}`} className="area-tile">
+            <div className="area-avatar" style={{ background: areaColor(a.id) }}>
+              {areaInitials(a.name)}
+            </div>
+            <div className="area-tile-name">{a.name}</div>
+            <div className="area-tile-meta">
+              {a.projects?.length ?? 0} projects · {a.kind === "pipeline" ? "Pipeline" : "Freeform"}
+            </div>
+          </a>
+        ))}
+      </div>
+
       <h2>New area</h2>
       <form action={createArea} className="card">
         <div style={{ display: "grid", gap: 8 }}>
@@ -41,20 +60,6 @@ export default async function AreasPage() {
           <button type="submit">Add</button>
         </div>
       </form>
-
-      <h2>All areas</h2>
-      {(!areas || areas.length === 0) && (
-        <p className="empty">No areas yet — add one above.</p>
-      )}
-      {areas?.map((a: any) => (
-        <a key={a.id} href={`/areas/${a.id}`} className="card row">
-          <span>{a.name}</span>
-          <div className="row" style={{ gap: 8 }}>
-            <span className="pill">{a.kind === "pipeline" ? "Pipeline" : "Freeform"}</span>
-            <span className="muted">{a.projects?.length ?? 0} projects</span>
-          </div>
-        </a>
-      ))}
     </Shell>
   );
 }
