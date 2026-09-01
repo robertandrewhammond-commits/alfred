@@ -51,9 +51,12 @@ export default async function AreaDashboardPage({
 
   const { data: projects } = await supabase
     .from("projects")
-    .select("id, name, status, priority, deal_value, pipeline_stage, win_probability, target_date")
+    .select(
+      "id, name, status, priority, deal_value, pipeline_stage, win_probability, target_date, city, units, scope, estimator, bid_date, companies(name)"
+    )
     .eq("area_id", area.id)
-    .order("created_at", { ascending: false });
+    .order("priority", { ascending: true })
+    .order("deal_value", { ascending: false, nullsFirst: false });
 
   const { data: notes } = await supabase
     .from("notes")
@@ -92,30 +95,83 @@ export default async function AreaDashboardPage({
         </div>
       </form>
 
-      <h2>Projects ({projects?.length ?? 0})</h2>
+      <h2>
+        Projects ({projects?.length ?? 0})
+        {isPipeline && " — sorted by priority, then deal value"}
+      </h2>
       {(!projects || projects.length === 0) && (
         <p className="empty">No projects yet — add one above.</p>
       )}
-      {projects?.map((p: any) => (
-        <a key={p.id} href={`/projects/${p.id}`} className="card row">
-          <div>
+
+      {isPipeline && projects && projects.length > 0 && (
+        <div className="pipeline-table-wrap">
+          <table className="pipeline-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>GC</th>
+                <th>City</th>
+                <th>Stage</th>
+                <th>Scope</th>
+                <th>Deal Value</th>
+                <th>Units</th>
+                <th>Win %</th>
+                <th>Estimator</th>
+                <th>Bid Date</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((p: any) => (
+                <tr key={p.id}>
+                  <td>
+                    <a href={`/projects/${p.id}`} className="row-link" style={{ color: "var(--accent)" }}>
+                      {p.name}
+                    </a>
+                  </td>
+                  <td>{p.companies?.name ?? "—"}</td>
+                  <td>{p.city ?? "—"}</td>
+                  <td>{p.pipeline_stage ?? "—"}</td>
+                  <td>{p.scope ?? "—"}</td>
+                  <td>{p.deal_value ? `$${Number(p.deal_value).toLocaleString()}` : "—"}</td>
+                  <td>{p.units ?? "—"}</td>
+                  <td>
+                    {p.win_probability != null ? (
+                      <div className="win-bar-wrap">
+                        <div className="win-bar-track">
+                          <div
+                            className="win-bar-fill"
+                            style={{ width: `${Math.round(Number(p.win_probability) * 100)}%` }}
+                          />
+                        </div>
+                        <span>{Math.round(Number(p.win_probability) * 100)}%</span>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{p.estimator ?? "—"}</td>
+                  <td>{p.bid_date ? new Date(p.bid_date).toLocaleDateString() : "—"}</td>
+                  <td>
+                    <span className={`pill ${p.priority}`}>{p.priority}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!isPipeline &&
+        projects?.map((p: any) => (
+          <a key={p.id} href={`/projects/${p.id}`} className="card row">
             <div>{p.name}</div>
-            {isPipeline && p.pipeline_stage && (
-              <div className="muted" style={{ fontSize: 12 }}>
-                {p.pipeline_stage}
-                {p.win_probability != null ? ` · ${Math.round(Number(p.win_probability) * 100)}% win` : ""}
-              </div>
-            )}
-          </div>
-          <div className="row" style={{ gap: 8 }}>
-            {isPipeline && p.deal_value && (
-              <span className="pill">${Number(p.deal_value).toLocaleString()}</span>
-            )}
-            <span className={`pill ${p.priority}`}>{p.priority}</span>
-            <span className="pill">{p.status}</span>
-          </div>
-        </a>
-      ))}
+            <div className="row" style={{ gap: 8 }}>
+              <span className={`pill ${p.priority}`}>{p.priority}</span>
+              <span className="pill">{p.status}</span>
+            </div>
+          </a>
+        ))}
 
       <h2>Notes</h2>
       <form action={addAreaNote} className="card">
